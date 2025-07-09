@@ -1,9 +1,20 @@
 import HexTile from "./HexTile";
 import { HexGrid, Layout } from "react-hexgrid";
-import { initializeBoard } from "./initializeBoard";
+import { initializeTiles, initializeVertices } from "./initializeBoard";
+import { useState } from "react";
+import type { Tile } from "./models/Tile";
+import type { Vertex } from "./models/Vertex";
+import type { Edge } from "./models/Edge";
 
 function Board() {
-  const tiles = initializeBoard();
+  // Initialize board once
+  const [tiles, setTiles] = useState<Tile[]>(() => initializeTiles());
+
+  // Initialize vertex and edge positions
+  const [vertices, setVertices] = useState<Vertex[]>(() =>
+    initializeVertices()
+  );
+  const [edges, setEdges] = useState<Edge[]>();
 
   return (
     <div>
@@ -19,6 +30,11 @@ function Board() {
             <HexTile key={tile.id} tile={tile} />
           ))}
         </Layout>
+        <svg>
+          {vertices.map((vertex) => (
+            <circle cx="100" cy="100" r="50" stroke="black" fill="red" />
+          ))}
+        </svg>
       </HexGrid>
     </div>
   );

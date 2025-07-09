@@ -1,4 +1,5 @@
 import type { Tile, ResourceType } from './models/Tile';
+import type { Vertex } from './models/Vertex';
 
 function initializeArray() {
   const tiles: Tile[] = [];
@@ -26,7 +27,7 @@ function shuffleArray<T>(arr: T[]) {
   return arr;
 }
 
-export function initializeBoard() {
+export function initializeTiles() {
   const tiles = initializeArray();
 
   // initialize array with all dice values
@@ -64,4 +65,18 @@ export function initializeBoard() {
   // swap 0 with the desert tile
 
   return tiles;
+}
+
+export function initializeVertices() {
+    const vertices: Vertex[] = [];
+    vertices.push( {
+        id: 1,
+        q: 0,
+        r: 0,
+        s: 0,
+        owner: null
+    });
+
+    return vertices;
+
 }
