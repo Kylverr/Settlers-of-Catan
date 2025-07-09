@@ -1,67 +1,24 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-
-# === Node Modules ===
-node_modules/
-**/node_modules/
-
-# === Build Artifacts ===
-client/build/
-server/build/
-dist/
-*.log
-
-# === Logs ===
-logs/
+# Logs
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# === Environment & Docker Files ===
-*.env
-.env.*
+node_modules
+dist
+dist-ssr
 *.local
-docker-volume/
 
-# === OS/System Files ===
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
-
-# === IDEs/Editors ===
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# === Misc ===
-*.tgz
-*.bak
-*.swp
-*.tmp
-
-# === Coverage/Test ===
-coverage/
-*.lcov
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

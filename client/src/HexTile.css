@@ -1,0 +1,28 @@
+.tiletext {
+    fill: black;
+    font-size: 5px;
+}
+
+.tilewheat {
+    fill: yellow;
+}
+
+.tilebrick {
+    fill: red;
+}
+
+.tileore {
+    fill: lightgrey;
+}
+
+.tilewood {
+    fill: darkgreen;
+}
+
+.tilesheep {
+    fill: lightgreen;
+}
+
+.tilenone {
+    fill: orange;
+}
