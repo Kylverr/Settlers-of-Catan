@@ -15,8 +15,8 @@ function hexToPixel(tile: Tile) {
 }
 
 function pointyHexCorner(x: number, y: number, size: number, i: number) {
-  let angleDeg = 60 * (i * 60 + 30);
-  let angleRad = (Math.PI / 180) * angleDeg;
+  const angles = [-30, 30, 90, 150, 210, 270];
+  const angleRad = (Math.PI / 180) * angles[i];
   x = x + size * Math.cos(angleRad);
   y = y + size * Math.sin(angleRad);
   return { x, y };
@@ -39,9 +39,12 @@ function Board() {
         <Layout
           size={{ x: 10, y: 10 }}
           flat={false}
-          spacing={1.1}
+          spacing={1.0}
           origin={{ x: 0, y: 0 }}
         >
+          {tiles.map((tile) => (
+            <HexTile key={tile.id} tile={tile} />
+          ))}
           {vertices.map((vertex) => {
             const tile = tiles.find((t) => t.id === vertex.tileId);
             const { x: centerX, y: centerY } = hexToPixel(
@@ -61,16 +64,14 @@ function Board() {
                 key={vertex.id}
                 cx={x}
                 cy={y}
-                r={1.2}
+                r={0.8}
                 stroke="black"
+                strokeWidth={0.2}
                 fill={vertex.owner ? "blue" : "gray"}
+                fillOpacity={0.8}
               />
             );
           })}
-
-          {tiles.map((tile) => (
-            <HexTile key={tile.id} tile={tile} />
-          ))}
         </Layout>
       </HexGrid>
     </div>
