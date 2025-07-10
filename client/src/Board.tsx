@@ -1,6 +1,10 @@
 import HexTile from "./HexTile";
 import { HexGrid, Layout } from "react-hexgrid";
-import { initializeTiles, initializeVertices } from "./initializeBoard";
+import {
+  initializeTiles,
+  initializeVertices,
+  initializeEdges,
+} from "./initializeBoard";
 import { useState } from "react";
 import type { Tile } from "./models/Tile";
 import type { Vertex } from "./models/Vertex";
@@ -30,7 +34,10 @@ function Board() {
   const [vertices, setVertices] = useState<Vertex[]>(() =>
     initializeVertices(tiles)
   );
-  const [edges, setEdges] = useState<Edge[]>();
+  const [edges, setEdges] = useState<Edge[]>(() => initializeEdges(tiles));
+
+  // Create a state to handle hovering over a circle
+  const [hoveredVertex, setHoveredVertex] = useState<Vertex | null>(null);
 
   return (
     <div>
@@ -42,9 +49,11 @@ function Board() {
           spacing={1.0}
           origin={{ x: 0, y: 0 }}
         >
+          {/* Draw hexes */}
           {tiles.map((tile) => (
             <HexTile key={tile.id} tile={tile} />
           ))}
+          {/* Draw circles for unowned settlement locations*/}
           {vertices.map((vertex) => {
             const tile = tiles.find((t) => t.id === vertex.tileId);
             const { x: centerX, y: centerY } = hexToPixel(
@@ -59,7 +68,7 @@ function Board() {
               vertex.cornerIndex
             );
 
-            return (
+            return vertex.owner == null ? (
               <circle
                 key={vertex.id}
                 cx={x}
@@ -69,9 +78,94 @@ function Board() {
                 strokeWidth={0.2}
                 fill={vertex.owner ? "blue" : "gray"}
                 fillOpacity={0.8}
+                onMouseOver={() => setHoveredVertex(vertex)}
+                onMouseMove={() => setHoveredVertex(vertex)}
+                onMouseOut={() => setHoveredVertex(null)}
+                onMouseDown={() => (vertex.owner = "me")}
+              />
+            ) : (
+              <rect
+                x={x - 1.5}
+                y={y - 1.5}
+                width={3}
+                height={3}
+                fill="orange"
+                stroke="orange"
+                strokeWidth={0.3}
+                pointerEvents="none"
               />
             );
           })}
+          {/* Draw circles for unowned road locations*/}
+          {/*edges.map((edge) => {
+            const tile = tiles.find((t) => t.id === vertex.tileId);
+            const { x: centerX, y: centerY } = hexToPixel(
+              tile == null
+                ? { id: 1, resource: "none", number: 0, q: 0, r: 0, s: 0 }
+                : tile
+            );
+            const { x, y } = pointyHexCorner(
+              centerX,
+              centerY,
+              10,
+              vertex.cornerIndex
+            );
+
+            return vertex.owner == null ? (
+              <circle
+                key={vertex.id}
+                cx={x}
+                cy={y}
+                r={0.8}
+                stroke="black"
+                strokeWidth={0.2}
+                fill={vertex.owner ? "blue" : "gray"}
+                fillOpacity={0.8}
+                onMouseOver={() => setHoveredVertex(vertex)}
+                onMouseMove={() => setHoveredVertex(vertex)}
+                onMouseOut={() => setHoveredVertex(null)}
+                onMouseDown={() => (vertex.owner = "me")}
+              />
+            ) : (
+              <rect
+                x={x - 1.5}
+                y={y - 1.5}
+                width={3}
+                height={3}
+                fill="orange"
+                stroke="orange"
+                strokeWidth={0.3}
+                pointerEvents="none"
+              />
+            );
+          })*/}
+          {hoveredVertex &&
+            (() => {
+              const tile = tiles.find((t) => t.id === hoveredVertex.tileId);
+              if (!tile) return null;
+
+              const { x: centerX, y: centerY } = hexToPixel(tile);
+              const { x, y } = pointyHexCorner(
+                centerX,
+                centerY,
+                10,
+                hoveredVertex.cornerIndex
+              );
+
+              return (
+                <rect
+                  x={x - 1.5}
+                  y={y - 1.5}
+                  width={3}
+                  height={3}
+                  fill="orange"
+                  stroke="orange"
+                  strokeWidth={0.3}
+                  opacity={0.7}
+                  pointerEvents="none"
+                />
+              );
+            })()}
         </Layout>
       </HexGrid>
     </div>

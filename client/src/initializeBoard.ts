@@ -1,5 +1,6 @@
 import type { Tile, ResourceType } from './models/Tile';
 import type { Vertex } from './models/Vertex';
+import type { Edge } from './models/Edge';
 
 function initializeArray() {
   const tiles: Tile[] = [];
@@ -83,4 +84,22 @@ export function initializeVertices(tiles: Tile[]): Vertex[]{
     }
 
     return vertices;
+}
+
+export function initializeEdges(tiles: Tile[]): Edge[] {
+    const edges: Edge[] = [];
+    let nextId = 1;
+
+    for(const tile of tiles) {
+        for(let i = 0; i < 6; i++) {
+            edges.push( {
+                id: nextId++,
+                tileId: tile.id,
+                edgeIndex: i,
+                owner: null,
+            })
+        }
+    }
+
+    return edges;
 }
