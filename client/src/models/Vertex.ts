@@ -2,8 +2,7 @@ import type { Player } from './Player';
 
 export interface Vertex {
     id: number;
-    q: number;
-    r: number;
-    s: number;
+    tileId: number;
+    cornerIndex: number;
     owner: Player | null;
 }

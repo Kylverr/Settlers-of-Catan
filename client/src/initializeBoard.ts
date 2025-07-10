@@ -67,16 +67,86 @@ export function initializeTiles() {
   return tiles;
 }
 
-export function initializeVertices() {
+/*
+function hexToPixel(tile: Tile) {
+    let x = (Math.sqrt(3) * tile.q + Math.sqrt(3)/2 * tile.r);
+    let y = (3./2 * tile.r);
+
+    x = x * 10;
+    y = y * 10;
+    return { x, y};
+}
+
+function pointyHexCorners(centerX: number, centerY: number, size: number, i: number) {
+    let angleDeg = 60 * i - 30;
+    let angleRad = Math.PI / 180 * angleDeg;
+
+    let x = centerX + size * Math.cos(angleRad);
+    let y = centerY + size * Math.sin(angleRad);
+    return { x,
+        y
+    }
+}
+
+function pixelToHex(x: number, y: number) {
+    let newX = x / 10;
+    let newY = y / 10;
+
+    let q = (Math.sqrt(3)/3 * newX - 1./3 * y);
+    let r = 2./3 * newY;
+    return { q , r };
+}
+
+export function initializeVertices(tiles: Tile[]): Vertex[] {
+
+
+  const vertexMap = new Map<string, Vertex>();
+  let nextId = 1;
+
+  const cornerAngles = [30, 90, 150, 210, 270, 330];
+
+  for (const tile of tiles) {
+    for (const offset of cornerAngles) {
+      
+      let { x, y } = hexToPixel(tile);
+      ({x , y} = pointyHexCorners(x, y, 10, offset));
+      const { q, r} = pixelToHex(x, y);
+
+      const s = 0;
+
+      // Make a unique key to deduplicate
+      const key = `${q.toFixed(2)},${r.toFixed(2)},${s.toFixed(2)}`;
+
+      if (!vertexMap.has(key)) {
+        vertexMap.set(key, {
+          id: nextId++,
+          q,
+          r,
+          s,
+          owner: null,
+        });
+      }
+    }
+  }
+
+  return Array.from(vertexMap.values());
+}
+*/
+
+export function initializeVertices(tiles: Tile[]): Vertex[]{
     const vertices: Vertex[] = [];
-    vertices.push( {
-        id: 1,
-        q: 0,
-        r: 0,
-        s: 0,
-        owner: null
-    });
+    let nextId = 1;
+
+    for(const tile of tiles) {
+        for(let i = 0; i < 6; i++) {
+            vertices.push( {
+                id: nextId++,
+                tileId: tile.id,
+                cornerIndex: i,
+                owner: null,
+            })
+        }
+    }
 
     return vertices;
-
 }
