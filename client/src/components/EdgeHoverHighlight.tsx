@@ -1,6 +1,6 @@
-import type { Edge } from "./models/Edge";
-import type { Tile } from "./models/Tile";
-import { hexToPixel, pointyHexEdge } from "./utils/hexMath";
+import type { Edge } from "../models/Edge";
+import type { Tile } from "../models/Tile";
+import { hexToPixel, pointyHexEdge } from "../utils/hexMath";
 
 export function EdgeHoverHighlight({
   hoveredEdge,

@@ -1,5 +1,5 @@
 import { Hexagon, Text } from "react-hexgrid";
-import type { Tile } from "./models/Tile";
+import type { Tile } from "../models/Tile";
 import "./HexTile.css";
 
 interface HexTileProps {

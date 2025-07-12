@@ -1,6 +1,6 @@
-import type { Tile, ResourceType } from './models/Tile';
-import type { Vertex } from './models/Vertex';
-import type { Edge } from './models/Edge';
+import type { Tile, ResourceType } from '../models/Tile';
+import type { Vertex } from '../models/Vertex';
+import type { Edge } from '../models/Edge';
 
 function initializeArray() {
   const tiles: Tile[] = [];

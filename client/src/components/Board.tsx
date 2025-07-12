@@ -4,14 +4,14 @@ import {
   initializeTiles,
   initializeVertices,
   initializeEdges,
-} from "./initializeBoard";
+} from "../game/initializeBoard";
 import { useState } from "react";
-import type { Tile } from "./models/Tile";
-import type { Vertex } from "./models/Vertex";
-import type { Edge } from "./models/Edge";
+import type { Tile } from "../models/Tile";
+import type { Vertex } from "../models/Vertex";
+import type { Edge } from "../models/Edge";
 import { VertexHoverHighlight } from "./VertexHoverHighlight";
 import { EdgeHoverHighlight } from "./EdgeHoverHighlight";
-import { hexToPixel, pointyHexCorner, pointyHexEdge } from "./utils/hexMath";
+import { hexToPixel, pointyHexCorner, pointyHexEdge } from "../utils/hexMath";
 
 function Board() {
   // Initialize board once

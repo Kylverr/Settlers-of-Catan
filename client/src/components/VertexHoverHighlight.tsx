@@ -1,6 +1,6 @@
-import type { Tile } from "./models/Tile";
-import type { Vertex } from "./models/Vertex";
-import { pointyHexCorner, hexToPixel } from "./utils/hexMath";
+import type { Tile } from "../models/Tile";
+import type { Vertex } from "../models/Vertex";
+import { pointyHexCorner, hexToPixel } from "../utils/hexMath";
 
 export function VertexHoverHighlight({
   hoveredVertex,
