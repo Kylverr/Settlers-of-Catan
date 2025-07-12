@@ -9,22 +9,9 @@ import { useState } from "react";
 import type { Tile } from "./models/Tile";
 import type { Vertex } from "./models/Vertex";
 import type { Edge } from "./models/Edge";
-
-function hexToPixel(tile: Tile) {
-  let x = Math.sqrt(3) * tile.q + (Math.sqrt(3) / 2) * tile.r;
-  let y = (3 / 2) * tile.r;
-  x = x * 10;
-  y = y * 10;
-  return { x, y };
-}
-
-function pointyHexCorner(x: number, y: number, size: number, i: number) {
-  const angles = [-30, 30, 90, 150, 210, 270];
-  const angleRad = (Math.PI / 180) * angles[i];
-  x = x + size * Math.cos(angleRad);
-  y = y + size * Math.sin(angleRad);
-  return { x, y };
-}
+import { VertexHoverHighlight } from "./VertexHoverHighlight";
+import { EdgeHoverHighlight } from "./EdgeHoverHighlight";
+import { hexToPixel, pointyHexCorner, pointyHexEdge } from "./utils/hexMath";
 
 function Board() {
   // Initialize board once
@@ -38,6 +25,7 @@ function Board() {
 
   // Create a state to handle hovering over a circle
   const [hoveredVertex, setHoveredVertex] = useState<Vertex | null>(null);
+  const [hoveredEdge, setHoveredEdge] = useState<Edge | null>(null);
 
   return (
     <div>
@@ -97,75 +85,51 @@ function Board() {
             );
           })}
           {/* Draw circles for unowned road locations*/}
-          {/*edges.map((edge) => {
-            const tile = tiles.find((t) => t.id === vertex.tileId);
+          {edges.map((edge) => {
+            const tile = tiles.find((t) => t.id === edge.tileId);
             const { x: centerX, y: centerY } = hexToPixel(
               tile == null
                 ? { id: 1, resource: "none", number: 0, q: 0, r: 0, s: 0 }
                 : tile
             );
-            const { x, y } = pointyHexCorner(
+            const { x, y } = pointyHexEdge(
               centerX,
               centerY,
               10,
-              vertex.cornerIndex
+              edge.edgeIndex
             );
 
-            return vertex.owner == null ? (
+            return edge.owner == null ? (
               <circle
-                key={vertex.id}
+                key={edge.id}
                 cx={x}
                 cy={y}
                 r={0.8}
                 stroke="black"
                 strokeWidth={0.2}
-                fill={vertex.owner ? "blue" : "gray"}
+                fill={edge.owner ? "blue" : "white"}
                 fillOpacity={0.8}
-                onMouseOver={() => setHoveredVertex(vertex)}
-                onMouseMove={() => setHoveredVertex(vertex)}
-                onMouseOut={() => setHoveredVertex(null)}
-                onMouseDown={() => (vertex.owner = "me")}
+                onMouseOver={() => setHoveredEdge(edge)}
+                onMouseMove={() => setHoveredEdge(edge)}
+                onMouseOut={() => setHoveredEdge(null)}
+                onMouseDown={() => (edge.owner = "me")}
               />
             ) : (
               <rect
-                x={x - 1.5}
-                y={y - 1.5}
-                width={3}
-                height={3}
+                x={x - 1}
+                y={y - 2.5}
+                width={2}
+                height={5}
                 fill="orange"
                 stroke="orange"
                 strokeWidth={0.3}
                 pointerEvents="none"
+                transform={`rotate(${(edge.edgeIndex - 1) * 60} ${x} ${y})`}
               />
             );
-          })*/}
-          {hoveredVertex &&
-            (() => {
-              const tile = tiles.find((t) => t.id === hoveredVertex.tileId);
-              if (!tile) return null;
-
-              const { x: centerX, y: centerY } = hexToPixel(tile);
-              const { x, y } = pointyHexCorner(
-                centerX,
-                centerY,
-                10,
-                hoveredVertex.cornerIndex
-              );
-
-              return (
-                <rect
-                  x={x - 1.5}
-                  y={y - 1.5}
-                  width={3}
-                  height={3}
-                  fill="orange"
-                  stroke="orange"
-                  strokeWidth={0.3}
-                  opacity={0.7}
-                  pointerEvents="none"
-                />
-              );
-            })()}
+          })}
+          <EdgeHoverHighlight hoveredEdge={hoveredEdge} tiles={tiles} />
+          <VertexHoverHighlight hoveredVertex={hoveredVertex} tiles={tiles} />
         </Layout>
       </HexGrid>
     </div>
