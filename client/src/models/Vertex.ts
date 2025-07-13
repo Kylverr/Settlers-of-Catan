@@ -1,8 +1,8 @@
-import type { Player } from './Player';
+import type { PlayerId } from './Player';
 
 export interface Vertex {
     id: number;
-    tileId: number;
-    cornerIndex: number;
-    owner: Player | null;
+    tileIds: number[];
+    cornerIndices: number[];
+    owner: PlayerId | null;
 }

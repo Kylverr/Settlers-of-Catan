@@ -1,27 +1,17 @@
 import HexTile from "./HexTile";
 import { HexGrid, Layout } from "react-hexgrid";
-import {
-  initializeTiles,
-  initializeVertices,
-  initializeEdges,
-} from "../game/initializeBoard";
 import { useState } from "react";
-import type { Tile } from "../models/Tile";
 import type { Vertex } from "../models/Vertex";
 import type { Edge } from "../models/Edge";
 import { VertexHoverHighlight } from "./VertexHoverHighlight";
 import { EdgeHoverHighlight } from "./EdgeHoverHighlight";
 import { hexToPixel, pointyHexCorner, pointyHexEdge } from "../utils/hexMath";
+import type { GameState } from "../models/GameState";
+import { initializeGameState } from "../game/gameState";
 
 function Board() {
   // Initialize board once
-  const [tiles, setTiles] = useState<Tile[]>(() => initializeTiles());
-
-  // Initialize vertex and edge positions
-  const [vertices, setVertices] = useState<Vertex[]>(() =>
-    initializeVertices(tiles)
-  );
-  const [edges, setEdges] = useState<Edge[]>(() => initializeEdges(tiles));
+  const [gameState, setGameState] = useState<GameState>(initializeGameState());
 
   // Create a state to handle hovering over a circle
   const [hoveredVertex, setHoveredVertex] = useState<Vertex | null>(null);
@@ -38,12 +28,14 @@ function Board() {
           origin={{ x: 0, y: 0 }}
         >
           {/* Draw hexes */}
-          {tiles.map((tile) => (
+          {gameState.tiles.map((tile) => (
             <HexTile key={tile.id} tile={tile} />
           ))}
           {/* Draw circles for unowned settlement locations*/}
-          {vertices.map((vertex) => {
-            const tile = tiles.find((t) => t.id === vertex.tileId);
+          {gameState.vertices.map((vertex) => {
+            const tile = gameState.tiles.find(
+              (t) => t.id === vertex.tileIds[0]
+            );
             const { x: centerX, y: centerY } = hexToPixel(
               tile == null
                 ? { id: 1, resource: "none", number: 0, q: 0, r: 0, s: 0 }
@@ -53,7 +45,7 @@ function Board() {
               centerX,
               centerY,
               10,
-              vertex.cornerIndex
+              vertex.cornerIndices[0]
             );
 
             return vertex.owner == null ? (
@@ -85,8 +77,8 @@ function Board() {
             );
           })}
           {/* Draw circles for unowned road locations*/}
-          {edges.map((edge) => {
-            const tile = tiles.find((t) => t.id === edge.tileId);
+          {gameState.edges.map((edge) => {
+            const tile = gameState.tiles.find((t) => t.id === edge.tileId);
             const { x: centerX, y: centerY } = hexToPixel(
               tile == null
                 ? { id: 1, resource: "none", number: 0, q: 0, r: 0, s: 0 }
@@ -128,8 +120,14 @@ function Board() {
               />
             );
           })}
-          <EdgeHoverHighlight hoveredEdge={hoveredEdge} tiles={tiles} />
-          <VertexHoverHighlight hoveredVertex={hoveredVertex} tiles={tiles} />
+          <EdgeHoverHighlight
+            hoveredEdge={hoveredEdge}
+            tiles={gameState.tiles}
+          />
+          <VertexHoverHighlight
+            hoveredVertex={hoveredVertex}
+            tiles={gameState.tiles}
+          />
         </Layout>
       </HexGrid>
     </div>

@@ -14,7 +14,7 @@ function HexTile({ tile }: HexTileProps) {
       s={tile.s}
       className={"tile" + tile.resource}
     >
-      <Text className="tiletext">{tile.number}</Text>
+      <Text className="tiletext">{tile.number + " id: " + tile.id}</Text>
     </Hexagon>
   );
 }
