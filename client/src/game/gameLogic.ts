@@ -7,5 +7,5 @@ export function buildSettlement(state: GameState, edgeId: number) {
 }
 
 function canBuildSettlement(state: GameState, edgeId: number): boolean {
-    
+    return true;
 }

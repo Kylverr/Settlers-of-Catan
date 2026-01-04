@@ -1,14 +1,9 @@
 import type { GameState } from "../models/GameState";
-import { initializeEdges, initializeTiles, initializeVertices } from "./initializeBoard";
 
 export function initializeGameState(): GameState {
-    const tiles = initializeTiles();
-    const vertices = initializeVertices(tiles);
-    const edges = initializeEdges(tiles);
     return {
-        tiles,
-        vertices,
-        edges,
+        settlements: [],
+        roads: [],
         players: [
             { id: "p1", name: "player1", resources: {
                 none: 0,
@@ -29,6 +24,6 @@ export function initializeGameState(): GameState {
         ],
         currentPlayer: "p1",
         currentRoll: 0,
-        robberTileId: tiles.find((t) => t.resource === "none")?.id ?? 0
+        robberTileId: 0
     }
 }

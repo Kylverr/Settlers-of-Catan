@@ -1,6 +1,6 @@
 import HexTile from "./HexTile";
 import { HexGrid, Layout } from "react-hexgrid";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Vertex } from "../models/Vertex";
 import type { Edge } from "../models/Edge";
 import { VertexHoverHighlight } from "./VertexHoverHighlight";
@@ -8,129 +8,135 @@ import { EdgeHoverHighlight } from "./EdgeHoverHighlight";
 import { hexToPixel, pointyHexCorner, pointyHexEdge } from "../utils/hexMath";
 import type { GameState } from "../models/GameState";
 import { initializeGameState } from "../game/gameState";
+import { initializeBoard } from "../game/initializeBoard";
+
 
 function Board() {
-  // Initialize board once
+  const board = useMemo(() => initializeBoard(), []); // immutable
   const [gameState, setGameState] = useState<GameState>(initializeGameState());
 
-  // Create a state to handle hovering over a circle
   const [hoveredVertex, setHoveredVertex] = useState<Vertex | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<Edge | null>(null);
 
+  function placeSettlement(vertexId: number) {
+    setGameState((prev) => ({
+      ...prev,
+      settlements: [
+        ...prev.settlements,
+        { vertexId, owner: "me", isCity: false },
+      ],
+    }));
+  }
+
+  function placeRoad(edgeId: number) {
+    setGameState((prev) => ({
+      ...prev,
+      roads: [...prev.roads, { edgeId, owner: "me" }],
+    }));
+  }
+
   return (
-    <div>
-      <HexGrid width={1200} height={800} viewBox="-50 -50 100 100">
-        {/* Grid with manually inserted hexagons */}
-        <Layout
-          size={{ x: 10, y: 10 }}
-          flat={false}
-          spacing={1.0}
-          origin={{ x: 0, y: 0 }}
-        >
-          {/* Draw hexes */}
-          {gameState.tiles.map((tile) => (
-            <HexTile key={tile.id} tile={tile} />
-          ))}
-          {/* Draw circles for unowned settlement locations*/}
-          {gameState.vertices.map((vertex) => {
-            const tile = gameState.tiles.find(
-              (t) => t.id === vertex.tileIds[0]
-            );
-            const { x: centerX, y: centerY } = hexToPixel(
-              tile == null
-                ? { id: 1, resource: "none", number: 0, q: 0, r: 0, s: 0 }
-                : tile
-            );
-            const { x, y } = pointyHexCorner(
-              centerX,
-              centerY,
-              10,
-              vertex.cornerIndices[0]
-            );
+    <HexGrid width={1200} height={800} viewBox="-50 -50 100 100">
+      <Layout size={{ x: 10, y: 10 }} flat={false} spacing={1.0}>
+        {/* Tiles */}
+        {board.tiles.map((tile) => (
+          <HexTile key={tile.id} tile={tile} />
+        ))}
 
-            return vertex.owner == null ? (
-              <circle
-                key={vertex.id}
-                cx={x}
-                cy={y}
-                r={0.8}
-                stroke="black"
-                strokeWidth={0.2}
-                fill={vertex.owner ? "blue" : "gray"}
-                fillOpacity={0.8}
-                onMouseOver={() => setHoveredVertex(vertex)}
-                onMouseMove={() => setHoveredVertex(vertex)}
-                onMouseOut={() => setHoveredVertex(null)}
-                onMouseDown={() => (vertex.owner = "me")}
-              />
-            ) : (
-              <rect
-                x={x - 1.5}
-                y={y - 1.5}
-                width={3}
-                height={3}
-                fill="orange"
-                stroke="orange"
-                strokeWidth={0.3}
-                pointerEvents="none"
-              />
-            );
-          })}
-          {/* Draw circles for unowned road locations*/}
-          {gameState.edges.map((edge) => {
-            const tile = gameState.tiles.find((t) => t.id === edge.tileId);
-            const { x: centerX, y: centerY } = hexToPixel(
-              tile == null
-                ? { id: 1, resource: "none", number: 0, q: 0, r: 0, s: 0 }
-                : tile
-            );
-            const { x, y } = pointyHexEdge(
-              centerX,
-              centerY,
-              10,
-              edge.edgeIndex
-            );
+        {/* Vertices */}
+        {board.vertices.map((vertex) => {
+          const hasSettlement = gameState.settlements.some(
+            (s) => s.vertexId === vertex.id
+          );
 
-            return edge.owner == null ? (
-              <circle
-                key={edge.id}
-                cx={x}
-                cy={y}
-                r={0.8}
-                stroke="black"
-                strokeWidth={0.2}
-                fill={edge.owner ? "blue" : "white"}
-                fillOpacity={0.8}
-                onMouseOver={() => setHoveredEdge(edge)}
-                onMouseMove={() => setHoveredEdge(edge)}
-                onMouseOut={() => setHoveredEdge(null)}
-                onMouseDown={() => (edge.owner = "me")}
-              />
-            ) : (
-              <rect
-                x={x - 1}
-                y={y - 2.5}
-                width={2}
-                height={5}
-                fill="orange"
-                stroke="orange"
-                strokeWidth={0.3}
-                pointerEvents="none"
-                transform={`rotate(${(edge.edgeIndex - 1) * 60} ${x} ${y})`}
-              />
-            );
-          })}
-          <EdgeHoverHighlight
-            hoveredEdge={hoveredEdge}
-            tiles={gameState.tiles}
-          />
-          <VertexHoverHighlight
-            hoveredVertex={hoveredVertex}
-            tiles={gameState.tiles}
-          />
-        </Layout>
-      </HexGrid>
-    </div>
+          const tile = board.tiles.find(
+            (t) => t.id === vertex.tileIds[0]
+          )!;
+
+          return !hasSettlement ? (
+            <circle
+              key={vertex.id}
+              cx={vertex.x}
+              cy={vertex.y}
+              r={0.8}
+              fill="gray"
+              stroke="black"
+              strokeWidth={0.2}
+              onMouseOver={() => setHoveredVertex(vertex)}
+              onMouseOut={() => setHoveredVertex(null)}
+              onMouseDown={() => placeSettlement(vertex.id)}
+            />
+          ) : (
+            <rect
+              key={vertex.id}
+              x={vertex.x - 1.5}
+              y={vertex.y - 1.5}
+              width={3}
+              height={3}
+              fill="orange"
+              pointerEvents="none"
+            />
+          );
+        })}
+
+        {/* Edges */}
+        {board.edges.map((edge) => {
+          const hasRoad = gameState.roads.some(
+            (r) => r.edgeId === edge.id
+          );
+
+          const vA = board.vertices.find((v) => v.id === edge.vertexA)!;
+          const vB = board.vertices.find((v) => v.id === edge.vertexB)!;
+
+          const pAx = vA.x;
+          const pAy = vA.y;
+          const pBx = vB.x;
+          const pBy = vB.y;
+
+          const x = (pAx + pBx) / 2;
+          const y = (pAy + pBy) / 2;
+
+          const angle =
+            (Math.atan2(pBy - pAy, pBx - pAx) * 180) / Math.PI;
+
+          return !hasRoad ? (
+            <circle
+              key={edge.id}
+              cx={x}
+              cy={y}
+              r={0.8}
+              fill="white"
+              stroke="black"
+              strokeWidth={0.2}
+              onMouseOver={() => setHoveredEdge(edge)}
+              onMouseOut={() => setHoveredEdge(null)}
+              onMouseDown={() => placeRoad(edge.id)}
+            />
+          ) : (
+            <rect
+              key={edge.id}
+              x={x - 1}
+              y={y - 2.5}
+              width={2}
+              height={5}
+              fill="orange"
+              pointerEvents="none"
+              transform={`rotate(${angle} ${x} ${y})`}
+            />
+          );
+        })}
+
+
+        <VertexHoverHighlight
+          hoveredVertex={hoveredVertex}
+          tiles={board.tiles}
+        />
+        <EdgeHoverHighlight
+          hoveredEdge={hoveredEdge}
+          tiles={board.tiles}
+        />
+      </Layout>
+    </HexGrid>
   );
 }
 

@@ -1,12 +1,10 @@
-import type { Edge } from "./Edge";
 import type { Player, PlayerId } from "./Player";
-import type { Tile } from "./Tile";
-import type { Vertex } from "./Vertex";
+import type { Settlement } from "./Settlement";
+import type { Road } from "./Road";
 
 export interface GameState {
-    tiles: Tile[],
-    vertices: Vertex[],
-    edges: Edge[],
+    settlements: Settlement[];
+    roads: Road[];
     players: Player[],
     currentPlayer: PlayerId,
     currentRoll: number,

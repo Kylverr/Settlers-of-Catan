@@ -1,6 +1,8 @@
 import type { Tile, ResourceType } from '../models/Tile';
 import type { Vertex } from '../models/Vertex';
 import type { Edge } from '../models/Edge';
+import type { Board } from '../models/Board';
+import { hexToPixel, pointyHexCorner } from '../utils/hexMath';
 
 function initializeArray() {
   const tiles: Tile[] = [];
@@ -68,250 +70,92 @@ export function initializeTiles() {
   return tiles;
 }
 
-export function initializeVertices(tiles: Tile[]): Vertex[]{
+export function initializeVertices(tiles: Tile[]): Vertex[] {
     const vertices: Vertex[] = [];
+    const vertexMap = new Map<string, Vertex>();
     let nextId = 1;
 
-    // 1
-    nextId = topLeftVertexInsertion(vertices, tiles[0], nextId);
-    // 2
-    nextId = topMiddleVertexInsertion(vertices, tiles[1], nextId);
-    // 3
-    nextId = topRightVertexInsertion(vertices, tiles[2], nextId);
-    // 4
-    nextId = topMiddleLeftVertexInsertion(vertices, tiles[3], nextId);
-    // 5
-    nextId = topMiddleMiddleLeftVertexInsertion(vertices, tiles[4], nextId);
-    // 6
-    nextId = topMiddleMiddleVertexInsertion(vertices, tiles[5], nextId);
-    // 7
-    nextId = topMiddleRightVertexInsertion(vertices, tiles[6], nextId);
-    // 8
-    nextId = middleLeftVertexInsertion(vertices, tiles[7], nextId);
-    // 9
-    nextId = middleMiddleLeftVertexInsertion(vertices, tiles[8], nextId);
-    // 10
-    nextId = middleMiddleVertexInsertion(vertices, tiles[9], nextId);
-    // 11
-    nextId = middleMiddleRightVertexInsertion(vertices, tiles[10], nextId);
-    // 12
-    nextId = middleRightVertexInsertion(vertices, tiles[11], nextId);
-    // 13
-    nextId = bottomMiddleLeftVertexInsertion(vertices, tiles[12], nextId);
-    // 14
-    nextId = bottomMiddleMiddleLeftVertexInsertion(vertices, tiles[13], nextId);
-    // 15
-    nextId = bottomMiddleMiddleRightVertexInsertion(vertices, tiles[14], nextId);
-    // 16
-    nextId = bottomMiddleRightVertexInsertion(vertices, tiles[15], nextId);
-    // 17
-    nextId = bottomLeftVertexInsertion(vertices, tiles[16], nextId);
-    // 18
-    nextId = bottomMiddleVertexInsertion(vertices, tiles[17], nextId);
-    // 19
-    nextId = bottomRightVertexInsertion(vertices, tiles[18], nextId);
+    for (const tile of tiles) {
+        const { x: cx, y: cy } = hexToPixel(tile);
+
+        for (let corner = 0; corner < 6; corner++) {
+            const { x, y } = pointyHexCorner(cx, cy, 10, corner);
+
+            // Quantize to avoid floating-point drift
+            const key = `${x.toFixed(4)},${y.toFixed(4)}`;
+
+            let vertex = vertexMap.get(key);
+
+            if (!vertex) {
+                vertex = {
+                    id: nextId++,
+                    tileIds: [tile.id],
+                    x,
+                    y,
+                };
+                vertexMap.set(key, vertex);
+                vertices.push(vertex);
+            } else {
+                vertex.tileIds.push(tile.id);
+            }
+        }
+    }
+
     return vertices;
 }
 
-function topLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // top right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1], cornerIndices: [0, 4], owner: null});
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 4], cornerIndices: [1, 3, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4, tile.id + 3], cornerIndices: [2, 4, 0], owner: null});
-    // bottom left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 3], cornerIndices: [3, 5], owner: null});
-    // top left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [4], owner: null});
-    // top of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [5], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function topMiddleVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // top right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1], cornerIndices: [0, 4], owner: null});
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 4], cornerIndices: [1, 3, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4, tile.id + 3], cornerIndices: [2, 4, 0], owner: null});
-    // top of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [5], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function topRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // top right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [0], owner: null});
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4], cornerIndices: [1, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4, tile.id + 3], cornerIndices: [2, 4, 0], owner: null});
-    // top of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [5], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function topMiddleLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 5], cornerIndices: [1, 3, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 5, tile.id + 4], cornerIndices: [2, 4, 0], owner: null});
-    // bottom left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4], cornerIndices: [3, 5], owner: null});
-    // top left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [4], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function topMiddleMiddleLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 5], cornerIndices: [1, 3, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 5, tile.id + 4], cornerIndices: [2, 4, 0], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function topMiddleMiddleVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // same logic as topMiddleMiddleLeftVertexInsertion
-    return topMiddleMiddleLeftVertexInsertion(vertices, tile, nextId);
-}
-
-function topMiddleRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // top right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [0], owner: null});
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 5], cornerIndices: [1, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 5, tile.id + 4], cornerIndices: [2, 4, 0], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function middleLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 5], cornerIndices: [1, 3, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 5], cornerIndices: [2, 4], owner: null});
-    // bottom left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [3], owner: null});
-    // top left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [4], owner: null});  
-    // return new nextId
-    return nextId;
-}
-
-function middleMiddleLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // same logic as topMiddleMiddleLeftVertexInsertion
-    return topMiddleMiddleLeftVertexInsertion(vertices, tile, nextId); 
-}
-
-function middleMiddleVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // same logic as topMiddleMiddleLeftVertexInsertion
-    return topMiddleMiddleLeftVertexInsertion(vertices, tile, nextId); 
-}
-
-function middleMiddleRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // same logic as topMiddleMiddleLeftVertexInsertion
-    return topMiddleMiddleLeftVertexInsertion(vertices, tile, nextId); 
-}
-
-function middleRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // top right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [0], owner: null});
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [1], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4], cornerIndices: [2, 0], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function bottomMiddleLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 4], cornerIndices: [1, 3, 5], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4], cornerIndices: [2, 4], owner: null});
-    // bottom left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [3], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-
-function bottomMiddleMiddleLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 4, tile.id + 3], cornerIndices: [2, 4, 0], owner: null});
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1, tile.id + 4], cornerIndices: [1, 3, 5], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function bottomMiddleMiddleRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // same logic as bottomMiddleMiddleLeftVertexInsertion
-    return bottomMiddleMiddleLeftVertexInsertion(vertices, tile, nextId);
-}
-
-function bottomMiddleRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [1], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 3], cornerIndices: [2, 0], owner: null});   
-    // return new nextId
-    return nextId;
-}
-
-function bottomLeftVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1], cornerIndices: [1, 3], owner: null});    
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [2], owner: null});
-    // bottom left of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [3], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function bottomMiddleVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id, tile.id + 1], cornerIndices: [1, 3], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [2], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-function bottomRightVertexInsertion(vertices: Vertex[], tile: Tile, nextId: number) {
-    // bottom right of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [1], owner: null});
-    // bottom of tile
-    vertices.push({id: nextId++, tileIds: [tile.id], cornerIndices: [2], owner: null});
-    // return new nextId
-    return nextId;
-}
-
-
-export function initializeEdges(tiles: Tile[]): Edge[] {
+export function initializeEdges(vertices: Vertex[], tiles: Tile[]): Edge[] {
     const edges: Edge[] = [];
     let nextId = 1;
 
-    for(const tile of tiles) {
-        for(let i = 0; i < 6; i++) {
-            edges.push( {
-                id: nextId++,
-                tileId: tile.id,
-                edgeIndex: i,
-                owner: null,
-            })
+    // Helper to avoid duplicate edges
+    const seen = new Set<string>();
+
+    // Build a coordinate -> vertex map (same quantization used in initializeVertices)
+    const coordMap = new Map<string, Vertex>();
+    for (const v of vertices) {
+        const key = `${v.x.toFixed(4)},${v.y.toFixed(4)}`;
+        coordMap.set(key, v);
+    }
+
+    // For every tile, connect consecutive corners (0-1, 1-2, ..., 5-0)
+    for (const tile of tiles) {
+        const { x: cx, y: cy } = hexToPixel(tile);
+        for (let corner = 0; corner < 6; corner++) {
+            const { x: x1, y: y1 } = pointyHexCorner(cx, cy, 10, corner);
+            const { x: x2, y: y2 } = pointyHexCorner(cx, cy, 10, (corner + 1) % 6);
+
+            const key1 = `${x1.toFixed(4)},${y1.toFixed(4)}`;
+            const key2 = `${x2.toFixed(4)},${y2.toFixed(4)}`;
+
+            const v1 = coordMap.get(key1);
+            const v2 = coordMap.get(key2);
+
+            if (!v1 || !v2) continue; // should not happen, but be defensive
+
+            const idA = v1.id < v2.id ? v1.id : v2.id;
+            const idB = v1.id < v2.id ? v2.id : v1.id;
+            const key = `${idA}-${idB}`;
+
+            if (!seen.has(key)) {
+                seen.add(key);
+                edges.push({ id: nextId++, vertexA: idA, vertexB: idB });
+            }
         }
     }
 
     return edges;
+}
+
+
+export function initializeBoard(): Board {
+    const tiles = initializeTiles();
+    const vertices = initializeVertices(tiles);
+    const edges = initializeEdges(vertices, tiles);
+
+    return {
+        tiles,
+        vertices,
+        edges,
+    };
 }
