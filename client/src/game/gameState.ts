@@ -2,6 +2,7 @@ import type { GameState } from "../models/GameState";
 
 export function initializeGameState(): GameState {
     return {
+        phase: "SETUP_1",
         settlements: [],
         roads: [],
         players: [
