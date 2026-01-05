@@ -1,20 +1,20 @@
 import type { Edge } from "../models/Edge";
-import type { Tile } from "../models/Tile";
-import { hexToPixel, pointyHexEdge } from "../utils/hexMath";
+import type { Vertex } from "../models/Vertex";
 
 export function EdgeHoverHighlight({
   hoveredEdge,
-  tiles,
+  vertices,
 }: {
   hoveredEdge: Edge | null;
-  tiles: Tile[];
+  vertices: Vertex[];
 }) {
   if (!hoveredEdge) return null;
-  const tile = tiles.find((t) => t.id === hoveredEdge.tileId);
-  if (!tile) return null;
 
-  const { x: centerX, y: centerY } = hexToPixel(tile);
-  const { x, y } = pointyHexEdge(centerX, centerY, 10, hoveredEdge.edgeIndex);
+  const vA = vertices.find((v) => v.id === hoveredEdge.vertexA)!;
+  const vB = vertices.find((v) => v.id === hoveredEdge.vertexB)!;
+
+  const x = (vA.x + vB.x) / 2;
+  const y = (vA.y + vB.y) / 2;
 
   return (
     <rect
@@ -27,7 +27,7 @@ export function EdgeHoverHighlight({
       strokeWidth={0.3}
       opacity={0.7}
       pointerEvents="none"
-      transform={`rotate(${(hoveredEdge.edgeIndex - 1) * 60} ${x} ${y})`}
+      transform={`rotate(${(Math.atan2(vB.y - vA.y, vB.x - vA.x) * 180) / Math.PI + 90} ${x} ${y})`}
     />
   );
 }

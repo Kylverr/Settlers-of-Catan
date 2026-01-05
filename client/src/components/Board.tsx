@@ -5,7 +5,6 @@ import type { Vertex } from "../models/Vertex";
 import type { Edge } from "../models/Edge";
 import { VertexHoverHighlight } from "./VertexHoverHighlight";
 import { EdgeHoverHighlight } from "./EdgeHoverHighlight";
-import { hexToPixel, pointyHexCorner, pointyHexEdge } from "../utils/hexMath";
 import type { GameState } from "../models/GameState";
 import { initializeGameState } from "../game/gameState";
 import { initializeBoard } from "../game/initializeBoard";
@@ -97,7 +96,7 @@ function Board() {
           const y = (pAy + pBy) / 2;
 
           const angle =
-            (Math.atan2(pBy - pAy, pBx - pAx) * 180) / Math.PI;
+            (Math.atan2(pBy - pAy, pBx - pAx) * 180) / Math.PI + 90;
 
           return !hasRoad ? (
             <circle
@@ -129,11 +128,10 @@ function Board() {
 
         <VertexHoverHighlight
           hoveredVertex={hoveredVertex}
-          tiles={board.tiles}
         />
         <EdgeHoverHighlight
           hoveredEdge={hoveredEdge}
-          tiles={board.tiles}
+          vertices={board.vertices}
         />
       </Layout>
     </HexGrid>
