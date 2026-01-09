@@ -1,6 +1,6 @@
 import type { PlayerId } from "./Player";
 
 export interface Road {
-    edgeId: number;
+    edgeId: string;
     owner: PlayerId;
 }

@@ -1,4 +1,4 @@
-import type { Player, PlayerId } from "./Player";
+import type { Player } from "./Player";
 import type { Settlement } from "./Settlement";
 import type { Road } from "./Road";
 
@@ -8,16 +8,18 @@ type Phase =
     | "MAIN_GAME";
 
 export type Action =
-  | { type: "PLACE_SETTLEMENT"; vertexId: string }
-  | { type: "PLACE_ROAD"; edgeId: string }
-  | { type: "END_TURN" };
+  | { type: "PLACE_SETTLEMENT"; playerId: string; vertexId: string }
+  | { type: "PLACE_ROAD"; playerId: string; edgeId: string }
+  | { type: "END_TURN"; playerId: string };
 
 export interface GameState {
     phase: Phase;
     settlements: Settlement[];
     roads: Road[];
     players: Player[],
-    currentPlayer: PlayerId,
+    currentPlayerIndex: number,
     currentRoll: number,
     robberTileId: number
+
+    pendingPlacement?: "SETTLEMENT" | "ROAD";
 }

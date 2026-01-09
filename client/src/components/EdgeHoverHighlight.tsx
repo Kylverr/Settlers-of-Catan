@@ -4,9 +4,11 @@ import type { Vertex } from "../models/Vertex";
 export function EdgeHoverHighlight({
   hoveredEdge,
   vertices,
+  color,
 }: {
   hoveredEdge: Edge | null;
   vertices: Vertex[];
+  color: string;
 }) {
   if (!hoveredEdge) return null;
 
@@ -22,8 +24,8 @@ export function EdgeHoverHighlight({
       y={y - 2.5}
       width={2}
       height={5}
-      fill="orange"
-      stroke="orange"
+      fill={color}
+      stroke={color}
       strokeWidth={0.3}
       opacity={0.7}
       pointerEvents="none"

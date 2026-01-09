@@ -5,8 +5,8 @@ import type { Vertex } from "../models/Vertex";
 import type { Edge } from "../models/Edge";
 import { VertexHoverHighlight } from "./VertexHoverHighlight";
 import { EdgeHoverHighlight } from "./EdgeHoverHighlight";
-import type { GameState } from "../models/GameState";
-import { initializeGameState } from "../game/gameState";
+import type { Action, GameState } from "../models/GameState";
+import { applyAction, initializeGameState } from "../game/gameState";
 import { initializeBoard } from "../game/initializeBoard";
 
 
@@ -17,21 +17,8 @@ function Board() {
   const [hoveredVertex, setHoveredVertex] = useState<Vertex | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<Edge | null>(null);
 
-  function placeSettlement(vertexId: number) {
-    setGameState((prev) => ({
-      ...prev,
-      settlements: [
-        ...prev.settlements,
-        { vertexId, owner: "me", isCity: false },
-      ],
-    }));
-  }
-
-  function placeRoad(edgeId: number) {
-    setGameState((prev) => ({
-      ...prev,
-      roads: [...prev.roads, { edgeId, owner: "me" }],
-    }));
+  function dispatch(action: Action) {
+    setGameState(prev => applyAction(prev, action));
   }
 
   return (
@@ -63,7 +50,7 @@ function Board() {
               strokeWidth={0.2}
               onMouseOver={() => setHoveredVertex(vertex)}
               onMouseOut={() => setHoveredVertex(null)}
-              onMouseDown={() => placeSettlement(vertex.id)}
+              onMouseDown={() => dispatch({ type: "PLACE_SETTLEMENT", playerId: gameState.players[gameState.currentPlayerIndex].id, vertexId: vertex.id} )}
             />
           ) : (
             <rect
@@ -72,7 +59,7 @@ function Board() {
               y={vertex.y - 1.5}
               width={3}
               height={3}
-              fill="orange"
+              fill={gameState.players.find(p => p.id === gameState.settlements.find(s => s.vertexId === vertex.id)?.owner)?.color}
               pointerEvents="none"
             />
           );
@@ -109,7 +96,7 @@ function Board() {
               strokeWidth={0.2}
               onMouseOver={() => setHoveredEdge(edge)}
               onMouseOut={() => setHoveredEdge(null)}
-              onMouseDown={() => placeRoad(edge.id)}
+              onMouseDown={() => dispatch({ type: "PLACE_ROAD", playerId: gameState.players[gameState.currentPlayerIndex].id, edgeId: edge.id })}
             />
           ) : (
             <rect
@@ -118,7 +105,7 @@ function Board() {
               y={y - 2.5}
               width={2}
               height={5}
-              fill="orange"
+              fill={gameState.players.find(p => p.id === gameState.roads.find(r => r.edgeId === edge.id)?.owner)?.color}
               pointerEvents="none"
               transform={`rotate(${angle} ${x} ${y})`}
             />
@@ -128,10 +115,12 @@ function Board() {
 
         <VertexHoverHighlight
           hoveredVertex={hoveredVertex}
+          color={gameState.players[gameState.currentPlayerIndex].color}
         />
         <EdgeHoverHighlight
           hoveredEdge={hoveredEdge}
           vertices={board.vertices}
+          color={gameState.players[gameState.currentPlayerIndex].color}
         />
       </Layout>
     </HexGrid>

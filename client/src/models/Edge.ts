@@ -1,5 +1,5 @@
 export interface Edge {
-    id: number;
-    vertexA: number;
-    vertexB: number;
+    id: string;
+    vertexA: string;
+    vertexB: string;
 }

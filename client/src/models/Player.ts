@@ -5,6 +5,7 @@ export type PlayerId = string;
 export interface Player {
     id: PlayerId,
     name: string,
+    color: string,
     resources: Record<ResourceType, number>,
     settlements: number[],
     roads: number[],

@@ -5,75 +5,74 @@ import type { Board } from '../models/Board';
 import { hexToPixel, pointyHexCorner } from '../utils/hexMath';
 
 function initializeArray() {
-  const tiles: Tile[] = [];
-  let id = 1;
-  for (let r = -2; r <= 2; r++) {
-    for (let q = -2 - (r < 0 ? r : 0); q <= 2 - (r < 0 ? 0 : r); q++) {
-      tiles.push({
-        id: id++,
-        resource: "none",
-        number: 0,
-        q: q,
-        r: r,
-        s: 0,
-      });
+    const tiles: Tile[] = [];
+    let id = 1;
+    for (let r = -2; r <= 2; r++) {
+        for (let q = -2 - (r < 0 ? r : 0); q <= 2 - (r < 0 ? 0 : r); q++) {
+        tiles.push({
+            id: id++,
+            resource: "none",
+            number: 0,
+            q: q,
+            r: r,
+            s: 0,
+        });
+        }
     }
-  }
-  return tiles;
+    return tiles;
 }
 
 function shuffleArray<T>(arr: T[]) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
 }
 
 export function initializeTiles() {
-  const tiles = initializeArray();
+    const tiles = initializeArray();
 
-  // initialize array with all dice values
-  const nums = [0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
-  shuffleArray(nums);
+    // initialize array with all dice values
+    const nums = [0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
+    shuffleArray(nums);
 
-  // initialize array with resource values
-  const resources: ResourceType[] = ["none"];
-  const four_resources: ResourceType[] = ["wheat", "sheep", "wood"];
-  const three_resources: ResourceType[] = ["brick", "ore"];
+    // initialize array with resource values
+    const resources: ResourceType[] = ["none"];
+    const four_resources: ResourceType[] = ["wheat", "sheep", "wood"];
+    const three_resources: ResourceType[] = ["brick", "ore"];
 
-  four_resources.forEach((res) => {
-    for (let i = 0; i < 4; i++) resources.push(res);
-  });
-  three_resources.forEach((res) => {
-    for (let i = 0; i < 3; i++) resources.push(res);
-  });
+    four_resources.forEach((res) => {
+        for (let i = 0; i < 4; i++) resources.push(res);
+    });
+    three_resources.forEach((res) => {
+        for (let i = 0; i < 3; i++) resources.push(res);
+    });
 
-  shuffleArray(resources);
+    shuffleArray(resources);
 
-  // find desert location in resources
-  const desertIndex = resources.findIndex((r) => r === "none");
+    // find desert location in resources
+    const desertIndex = resources.findIndex((r) => r === "none");
 
-  // find 0 location in nums
-  const zeroIndex = nums.findIndex((n) => n === 0);
+    // find 0 location in nums
+    const zeroIndex = nums.findIndex((n) => n === 0);
 
-  // swap them so desert gets 0
-  [nums[desertIndex], nums[zeroIndex]] = [nums[zeroIndex], nums[desertIndex]];
+    // swap them so desert gets 0
+    [nums[desertIndex], nums[zeroIndex]] = [nums[zeroIndex], nums[desertIndex]];
 
-  nums.map((num, index) => {
-    tiles[index].number = num;
-    tiles[index].resource = resources[index];
-  });
+    nums.map((num, index) => {
+        tiles[index].number = num;
+        tiles[index].resource = resources[index];
+    });
 
-  // swap 0 with the desert tile
+    // swap 0 with the desert tile
 
-  return tiles;
+    return tiles;
 }
 
 export function initializeVertices(tiles: Tile[]): Vertex[] {
     const vertices: Vertex[] = [];
     const vertexMap = new Map<string, Vertex>();
-    let nextId = 1;
 
     for (const tile of tiles) {
         const { x: cx, y: cy } = hexToPixel(tile);
@@ -88,7 +87,7 @@ export function initializeVertices(tiles: Tile[]): Vertex[] {
 
             if (!vertex) {
                 vertex = {
-                    id: nextId++,
+                    id: `v_${key}`,
                     tileIds: [tile.id],
                     x,
                     y,
@@ -106,46 +105,51 @@ export function initializeVertices(tiles: Tile[]): Vertex[] {
 
 export function initializeEdges(vertices: Vertex[], tiles: Tile[]): Edge[] {
     const edges: Edge[] = [];
-    let nextId = 1;
-
-    // Helper to avoid duplicate edges
     const seen = new Set<string>();
 
-    // Build a coordinate -> vertex map (same quantization used in initializeVertices)
+    // Coordinate → vertex map
     const coordMap = new Map<string, Vertex>();
     for (const v of vertices) {
         const key = `${v.x.toFixed(4)},${v.y.toFixed(4)}`;
         coordMap.set(key, v);
     }
 
-    // For every tile, connect consecutive corners (0-1, 1-2, ..., 5-0)
     for (const tile of tiles) {
         const { x: cx, y: cy } = hexToPixel(tile);
+
         for (let corner = 0; corner < 6; corner++) {
-            const { x: x1, y: y1 } = pointyHexCorner(cx, cy, 10, corner);
-            const { x: x2, y: y2 } = pointyHexCorner(cx, cy, 10, (corner + 1) % 6);
+        const { x: x1, y: y1 } = pointyHexCorner(cx, cy, 10, corner);
+        const { x: x2, y: y2 } = pointyHexCorner(cx, cy, 10, (corner + 1) % 6);
 
-            const key1 = `${x1.toFixed(4)},${y1.toFixed(4)}`;
-            const key2 = `${x2.toFixed(4)},${y2.toFixed(4)}`;
+        const key1 = `${x1.toFixed(4)},${y1.toFixed(4)}`;
+        const key2 = `${x2.toFixed(4)},${y2.toFixed(4)}`;
 
-            const v1 = coordMap.get(key1);
-            const v2 = coordMap.get(key2);
+        const v1 = coordMap.get(key1);
+        const v2 = coordMap.get(key2);
 
-            if (!v1 || !v2) continue; // should not happen, but be defensive
+        if (!v1 || !v2) continue;
 
-            const idA = v1.id < v2.id ? v1.id : v2.id;
-            const idB = v1.id < v2.id ? v2.id : v1.id;
-            const key = `${idA}-${idB}`;
+        // Canonical ordering
+        const [a, b] =
+            v1.id < v2.id ? [v1.id, v2.id] : [v2.id, v1.id];
 
-            if (!seen.has(key)) {
-                seen.add(key);
-                edges.push({ id: nextId++, vertexA: idA, vertexB: idB });
-            }
+        const edgeKey = `${a}|${b}`;
+
+        if (!seen.has(edgeKey)) {
+            seen.add(edgeKey);
+
+            edges.push({
+                id: `e_${edgeKey}`,
+                vertexA: a,
+                vertexB: b,
+            });
+        }
         }
     }
 
     return edges;
 }
+
 
 
 export function initializeBoard(): Board {

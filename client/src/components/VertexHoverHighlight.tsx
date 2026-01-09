@@ -1,9 +1,11 @@
 import type { Vertex } from "../models/Vertex";
 
 export function VertexHoverHighlight({
-  hoveredVertex
+  hoveredVertex,
+  color
 }: {
   hoveredVertex: Vertex | null;
+  color: string;
 }) {
   if (!hoveredVertex) return null;
 
@@ -15,8 +17,8 @@ export function VertexHoverHighlight({
       y={y - 1.5}
       width={3}
       height={3}
-      fill="orange"
-      stroke="orange"
+      fill={color}
+      stroke={color}
       strokeWidth={0.3}
       opacity={0.7}
       pointerEvents="none"

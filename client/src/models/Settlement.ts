@@ -1,7 +1,7 @@
 import type { PlayerId } from './Player';
 
 export interface Settlement {
-    vertexId: number;
+    vertexId: string;
     owner: PlayerId;
     isCity: boolean;
 }

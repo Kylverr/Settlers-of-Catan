@@ -1,5 +1,5 @@
 export interface Vertex {
-    id: number;
+    id: string;
     tileIds: number[]; // always length 2 or 3
     x: number;
     y: number;
